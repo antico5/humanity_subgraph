@@ -1,13 +1,17 @@
-import { BigDecimal, BigInt, Entity, ethereum } from "@graphprotocol/graph-ts"
+import { Address, BigDecimal, BigInt, Entity, ethereum } from "@graphprotocol/graph-ts"
 import {
   Humanity,
   Execute,
   Propose,
   RemoveVote,
   Terminate,
-  Vote
+  Vote,
+  DepositCall,
+  WithdrawCall
 } from "../generated/Humanity/Humanity"
-import { Proposal } from "./schema"
+import { Account, Proposal } from "./schema"
+
+// Event Handlers
 
 export function handlePropose(event: Propose): void {
   const proposal = new Proposal(event.params.proposalId.toString())
@@ -64,6 +68,28 @@ export function handleTerminate(event: Terminate): void {
   proposal.save()
 }
 
+// Call handlers
+
+export function handleDepositCall(call: DepositCall): void {
+  const account = loadAccount(call.from)
+  let contract = Humanity.bind(call.to)
+  
+  account.deposited = contract.deposits(call.from)
+  account.maxDeposited = account.deposited > account.maxDeposited ? account.deposited : account.maxDeposited
+
+  account.save()
+}
+
+export function handleWithdrawCall(call: WithdrawCall): void {
+  const account = loadAccount(call.from)
+  
+  let contract = Humanity.bind(call.to)
+  
+  account.deposited = contract.deposits(call.from)
+
+  account.save()
+}
+
 // Private functions
 
 function loadProposal(id: BigInt): Proposal {
@@ -73,8 +99,20 @@ function loadProposal(id: BigInt): Proposal {
     throw new Error(`Trying to load non-indexed proposal with id ${id}`)
   }
 
-  return proposal
+  return proposal 
 }
+
+function loadAccount(address: Address): Account {
+  let account = Account.load(address.toHex())
+  
+  if(!account){
+    account = new Account(address.toHex())
+    account.save()
+  }
+
+  return account
+}
+
 
 function calculateOnEndFields(proposal: Proposal, event: ethereum.Event): void {
   proposal.endTime = event.block.timestamp

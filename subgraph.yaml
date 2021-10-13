@@ -16,8 +16,6 @@ dataSources:
       entities:
         - Proposal
         - Account
-        - Vote
-        - Analytics
       abis:
         - name: Humanity
           file: ./abis/Humanity.json
@@ -32,4 +30,9 @@ dataSources:
           handler: handleTerminate
         - event: Vote(indexed uint256,indexed address,bool,uint256)
           handler: handleVote
+      callHandlers:
+        - function: deposit(uint256)
+          handler: handleDepositCall
+        - function: withdraw(uint256)
+          handler: handleWithdrawCall
       file: ./src/mapping.ts

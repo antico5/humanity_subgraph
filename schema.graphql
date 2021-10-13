@@ -20,3 +20,13 @@ type Proposal @entity {
   voteActionCount: BigInt
   timeOpen: BigInt
 }
+
+type Account @entity {
+  id: ID!
+  deposited: BigInt!
+  maxDeposited: BigInt!
+  yesVoteCount: BigInt!
+  noVoteCount: BigInt!
+  proposalCount: BigInt!
+  feesReceived: BigInt!
+}
