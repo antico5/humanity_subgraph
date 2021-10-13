@@ -1,4 +1,4 @@
-import { BigInt, Entity } from "@graphprotocol/graph-ts"
+import { BigDecimal, BigInt, Entity, ethereum } from "@graphprotocol/graph-ts"
 import {
   Humanity,
   Execute,
@@ -9,74 +9,85 @@ import {
 } from "../generated/Humanity/Humanity"
 import { Proposal } from "./schema"
 
-// export function handleExecute(event: Execute): void {
-//   // Entities can be loaded from the store using a string ID; this ID
-//   // needs to be unique across all entities of the same type
-//   let entity = ExampleEntity.load(event.transaction.from.toHex())
-
-//   // Entities only exist after they have been saved to the store;
-//   // `null` checks allow to create entities on demand
-//   if (!entity) {
-//     entity = new ExampleEntity(event.transaction.from.toHex())
-
-//     // Entity fields can be set using simple assignments
-//     entity.count = BigInt.fromI32(0)
-//   }
-
-//   // BigInt and BigDecimal math are supported
-//   entity.count = entity.count + BigInt.fromI32(1)
-
-//   // Entity fields can be set based on event parameters
-//   entity.proposalId = event.params.proposalId
-
-//   // Entities can be written to the store with `.save()`
-//   entity.save()
-
-//   // Note: If a handler doesn't require existing field values, it is faster
-//   // _not_ to load the entity from the store. Instead, create it fresh with
-//   // `new Entity(...)`, set the fields that should be updated and save the
-//   // entity back to the store. Fields that were not set or unset remain
-//   // unchanged, allowing for partial updates to be applied.
-
-//   // It is also possible to access smart contracts from mappings. For
-//   // example, the contract that has emitted the event can be connected to
-//   // with:
-//   //
-//   // let contract = Contract.bind(event.address)
-//   //
-//   // The following functions can then be called on this contract to access
-//   // state variables and other data:
-//   //
-//   // - contract.proposals(...)
-//   // - contract.yesVotes(...)
-//   // - contract.time(...)
-//   // - contract.OPEN_VOTE_PERIOD(...)
-//   // - contract.TOTAL_VOTE_PERIOD(...)
-//   // - contract.getProposalsCount(...)
-//   // - contract.propose(...)
-//   // - contract.void(...)
-//   // - contract.withdrawTimes(...)
-//   // - contract.proposalFee(...)
-//   // - contract.getProposal(...)
-//   // - contract.noVotes(...)
-//   // - contract.proposeWithFeeRecipient(...)
-//   // - contract.VETO_PERIOD(...)
-//   // - contract.token(...)
-//   // - contract.deposits(...)
-// }
-
 export function handlePropose(event: Propose): void {
   const proposal = new Proposal(event.params.proposalId.toString())
+
+  let contract = Humanity.bind(event.address)
+  const contractProposal = contract.getProposal(event.params.proposalId)
 
   proposal.proposer = event.params.proposer;
   proposal.target = event.params.target;
   proposal.data = event.params.data;
+  proposal.feeRecipient = contractProposal.feeRecipient;
+  proposal.fee = contractProposal.fee;
+  proposal.startTime = contractProposal.startTime;
 
   proposal.save()
 }
 
-export function handleRemoveVote(event: RemoveVote): void {}
+export function handleVote(event: Vote): void {
+  const proposal = loadProposal(event.params.proposalId)
 
-export function handleTerminate(event: Terminate): void {}
+  calculateOnVoteFields(proposal, event)
 
-export function handleVote(event: Vote): void {}
+  proposal.voteActionCount = proposal.voteActionCount.plus(BigInt.fromI32(1));
+
+  proposal.save()
+}
+
+export function handleRemoveVote(event: RemoveVote): void {
+  const proposal = loadProposal(event.params.proposalId)
+
+  calculateOnVoteFields(proposal, event)
+
+  proposal.voteActionCount = proposal.voteActionCount.minus(BigInt.fromI32(1));
+
+  proposal.save()
+}
+
+export function handleExecute(event: Execute): void {
+  const proposal = loadProposal(event.params.proposalId)
+  
+  proposal.result = "Yes"
+
+  calculateOnEndFields(proposal, event)
+
+  proposal.save()
+}
+
+export function handleTerminate(event: Terminate): void {
+  const proposal = loadProposal(event.params.proposalId)
+
+  proposal.result = "No"
+  calculateOnEndFields(proposal, event)
+
+  proposal.save()
+}
+
+// Private functions
+
+function loadProposal(id: BigInt): Proposal {
+  const proposal = Proposal.load(id.toString())
+  
+  if(!proposal){
+    throw new Error(`Trying to load non-indexed proposal with id ${id}`)
+  }
+
+  return proposal
+}
+
+function calculateOnEndFields(proposal: Proposal, event: ethereum.Event): void {
+  proposal.endTime = event.block.timestamp
+  proposal.timeOpen = event.block.timestamp.minus(proposal.startTime)
+}
+
+function calculateOnVoteFields(proposal: Proposal, event: ethereum.Event): void {
+  let contract = Humanity.bind(event.address)
+  const contractProposal = contract.getProposal(BigInt.fromString(proposal.id))
+
+  proposal.yesCount = contractProposal.yesCount
+  proposal.noCount = contractProposal.noCount
+
+  const totalCount = proposal.yesCount.plus(proposal.noCount)
+  proposal.acceptanceRatio = proposal.yesCount.divDecimal(totalCount.toBigDecimal())
+}
