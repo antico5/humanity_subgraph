@@ -1,4 +1,4 @@
-specVersion: 0.0.1
+specVersion: 0.0.2
 schema:
   file: ./schema.graphql
 dataSources:
@@ -8,16 +8,16 @@ dataSources:
     source:
       address: "0xDd806c4fDAd2949a97Fda79036cfbb8750181b37"
       abi: Humanity
+      startBlock: 7723872
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
       language: wasm/assemblyscript
       entities:
-        - Execute
-        - Propose
-        - RemoveVote
-        - Terminate
+        - Proposal
+        - Account
         - Vote
+        - Analytics
       abis:
         - name: Humanity
           file: ./abis/Humanity.json

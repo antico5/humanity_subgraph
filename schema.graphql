@@ -1,5 +1,22 @@
-type ExampleEntity @entity {
+enum Result {
+  Pending
+  Yes
+  No
+}
+
+type Proposal @entity {
   id: ID!
-  count: BigInt!
-  proposalId: BigInt! # uint256
+  result: Result
+  target: Bytes
+  data: Bytes
+  proposer: Bytes
+  feeRecipient: Bytes
+  fee: BigInt
+  startTime: BigInt
+  yesCount: BigInt
+  noCount: BigInt
+  acceptanceRatio: BigDecimal
+  endTime: BigInt
+  voteActionCount: BigInt
+  timeOpen: BigInt
 }
