@@ -6,18 +6,18 @@ enum Result {
 
 type Proposal @entity {
   id: ID!
-  result: Result
-  target: Bytes
-  data: Bytes
-  proposer: Bytes
-  feeRecipient: Bytes
-  fee: BigInt
-  startTime: BigInt
-  yesCount: BigInt
-  noCount: BigInt
+  result: Result!
+  target: Bytes!
+  data: Bytes!
+  proposer: Bytes!
+  feeRecipient: Bytes!
+  fee: BigInt!
+  startTime: BigInt!
+  yesCount: BigInt!
+  noCount: BigInt!
   acceptanceRatio: BigDecimal
   endTime: BigInt
-  voteActionCount: BigInt
+  voteActionCount: BigInt!
   timeOpen: BigInt
 }
 

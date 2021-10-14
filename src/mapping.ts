@@ -9,7 +9,7 @@ import {
   DepositCall,
   WithdrawCall
 } from "../generated/Humanity/Humanity"
-import { Account, Proposal } from "./schema"
+import { Account, Proposal } from "../generated/schema"
 
 // Event Handlers
 
