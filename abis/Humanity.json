@@ -11,8 +11,8 @@
       { "name": "feeRecipient", "type": "address" },
       { "name": "fee", "type": "uint256" },
       { "name": "startTime", "type": "uint256" },
-      { "name": "yesCount", "type": "uint256" },
-      { "name": "noCount", "type": "uint256" }
+      { "name": "yesAmount", "type": "uint256" },
+      { "name": "noAmount", "type": "uint256" }
     ],
     "payable": false,
     "stateMutability": "view",
@@ -182,8 +182,8 @@
           { "name": "feeRecipient", "type": "address" },
           { "name": "fee", "type": "uint256" },
           { "name": "startTime", "type": "uint256" },
-          { "name": "yesCount", "type": "uint256" },
-          { "name": "noCount", "type": "uint256" }
+          { "name": "yesAmount", "type": "uint256" },
+          { "name": "noAmount", "type": "uint256" }
         ],
         "name": "",
         "type": "tuple"

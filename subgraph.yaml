@@ -16,6 +16,8 @@ dataSources:
       entities:
         - Proposal
         - Account
+        - Vote
+        - Analytic
       abis:
         - name: Humanity
           file: ./abis/Humanity.json

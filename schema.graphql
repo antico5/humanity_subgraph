@@ -6,19 +6,21 @@ enum Result {
 
 type Proposal @entity {
   id: ID!
-  result: Result!
+  result: String!
   target: Bytes!
   data: Bytes!
   proposer: Bytes!
   feeRecipient: Bytes!
   fee: BigInt!
   startTime: BigInt!
-  yesCount: BigInt!
-  noCount: BigInt!
+  yesAmount: BigInt!
+  noAmount: BigInt!
   acceptanceRatio: BigDecimal
   endTime: BigInt
   voteActionCount: BigInt!
   timeOpen: BigInt
+
+  votes: [Vote!]! @derivedFrom(field: "proposal")
 }
 
 type Account @entity {
@@ -29,4 +31,26 @@ type Account @entity {
   noVoteCount: BigInt!
   proposalCount: BigInt!
   feesReceived: BigInt!
+
+  votes: [Vote!]! @derivedFrom(field: "account")
+}
+
+type Vote @entity {
+  id: ID!
+  account: Account!
+  proposal: Proposal!
+  weight: BigInt!
+  approve: Boolean!
+}
+
+type Analytic @entity {
+  id: ID!
+  proposalCount: BigInt!
+  completedProposalCount: BigInt!
+  totalWait: BigInt!
+  avgWait: BigInt!
+  totalPassed: BigInt!
+  totalRejected: BigInt!
+  totalAmount: BigInt!
+  avgAmount: BigInt!
 }
