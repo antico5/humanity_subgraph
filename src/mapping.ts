@@ -11,23 +11,25 @@ import {
   Vote__Params
 } from "../generated/Humanity/Humanity"
 import { Account, Analytic, Proposal, Vote } from "../generated/schema"
+export { runTests } from "../tests/humanity.test"
 
 // Event Handlers
 
 export function handlePropose(event: Propose): void {
+  log.debug('proposer {}', [event.params.proposer.toHexString()])
   const proposal = new Proposal(event.params.proposalId.toString())
   const account = loadAccount(event.params.proposer)
   const analytics = getAnalytic()
-
-  let contract = Humanity.bind(event.address)
-  const contractProposal = contract.getProposal(event.params.proposalId)
+  
+  // let contract = Humanity.bind(event.address)
+  // const contractProposal = contract.getProposal(event.params.proposalId)
 
   proposal.proposer = event.params.proposer;
   proposal.target = event.params.target;
   proposal.data = event.params.data;
-  proposal.feeRecipient = contractProposal.feeRecipient;
-  proposal.fee = contractProposal.fee;
-  proposal.startTime = contractProposal.startTime;
+  // proposal.feeRecipient = contractProposal.feeRecipient;
+  // proposal.fee = contractProposal.fee;
+  // proposal.startTime = contractProposal.startTime;
   proposal.save()
 
   account.proposalCount = account.proposalCount.plus(BigInt.fromI32(1))

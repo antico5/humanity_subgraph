@@ -4,6 +4,7 @@
   "scripts": {
     "codegen": "graph codegen",
     "build": "graph build",
+    "test": "npm run build && graph test Humanity",
     "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ humanity_armando",
     "deploy-dev": "graph deploy --node https://api.studio.thegraph.com/deploy/ humanity_armando --version-label v$(date +%s) ",
     "create-local": "graph create --node http://localhost:8020/ humanity_armando",
@@ -12,7 +13,9 @@
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "0.22.3",
-    "@graphprotocol/graph-ts": "0.22.1",
+    "@graphprotocol/graph-ts": "0.22.1"
+  },
+  "devDependencies": {
     "matchstick-as": "^0.1.5"
   }
 }
